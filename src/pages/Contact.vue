@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
 import liff from "@line/liff";
+import { useField, useForm } from "vee-validate";
+import * as yup from "yup";
+import { metaProperty } from "@babel/types";
 
 type UserProfile = {
   profile?: {
@@ -11,28 +14,31 @@ type UserProfile = {
   };
 };
 
-type Messages = {
-  first_name: string;
-  last_name: string;
-  compony: string;
-  email: string;
-  phone: string;
-  detail: string;
-};
-
 const isInClient = ref<boolean | "NOT_INITIALIZED">("NOT_INITIALIZED");
 const userProfile = reactive<UserProfile>({
   profile: undefined,
 });
 
-const messages = reactive<Messages>({
-  first_name: "",
-  last_name: "",
-  compony: "",
-  email: "",
-  phone: "",
-  detail: "",
+const formSchema = yup.object({
+  first_name: yup.string().required("性は必須項目です"),
+  last_name: yup.string().required("名は必須項目です"),
+  email: yup.string().required("メールアドレスは必須項目です").email("有効なメールアドレスをご入力ください"),
+  phone: yup
+    .string()
+    .required("電話番号は必須項目です")
+    .matches(/^0\d{2,3}-\d{1,4}-\d{4}$/, "有効な電話番号をご入力ください"),
+  detail: yup.string().required("詳細は必須項目です"),
 });
+
+const { errors, meta, handleSubmit } = useForm({ validationSchema: formSchema });
+
+// フォームデータバリデーション
+const { value: first_name } = useField<string>("first_name");
+const { value: last_name } = useField<string>("last_name");
+const company = "";
+const { value: email } = useField<string>("email");
+const { value: phone } = useField<number>("phone");
+const { value: detail } = useField<string>("detail");
 
 onMounted(async () => {
   // LIFFブラウザで起動しているかの判定
@@ -50,7 +56,7 @@ const getProfile = async () => {
   userProfile.profile = profile;
 };
 
-const sendMessages = async () => {
+const sendMessages = handleSubmit(async (values) => {
   if (!liff.isInClient()) {
     window.alert("現在、LIFFを外部ブラウザで開いているため、このボタンは使用できません。");
   } else {
@@ -61,17 +67,17 @@ const sendMessages = async () => {
           text:
             "__お問い合わせ__" +
             "\n" +
-            messages.first_name +
+            first_name +
             "\n" +
-            messages.last_name +
+            last_name +
             "\n" +
-            messages.compony +
+            company +
             "\n" +
-            messages.email +
+            email +
             "\n" +
-            messages.phone +
+            phone +
             "\n" +
-            messages.detail,
+            detail,
         },
       ])
       .then(() => {
@@ -82,7 +88,7 @@ const sendMessages = async () => {
         window.alert("Error sending message: " + error);
       });
   }
-};
+});
 </script>
 
 <template>
@@ -103,25 +109,27 @@ const sendMessages = async () => {
         <div>
           <label for="first-name" class="inline-block text-gray-800 text-sm sm:text-base mb-2">性*</label>
           <input
-            v-model="messages.first_name"
+            v-model="first_name"
             name="first-name"
             class="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
           />
+          <p class="text-red-500">{{ errors.first_name }}</p>
         </div>
 
         <div>
           <label for="last-name" class="inline-block text-gray-800 text-sm sm:text-base mb-2">名*</label>
           <input
-            v-model="messages.last_name"
+            v-model="last_name"
             name="last-name"
             class="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
           />
+          <p class="text-red-500">{{ errors.last_name }}</p>
         </div>
 
         <div class="sm:col-span-2">
           <label for="company" class="inline-block text-gray-800 text-sm sm:text-base mb-2">会社名</label>
           <input
-            v-model="messages.compony"
+            v-model="company"
             name="company"
             class="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
           />
@@ -130,28 +138,31 @@ const sendMessages = async () => {
         <div class="sm:col-span-2">
           <label for="email" class="inline-block text-gray-800 text-sm sm:text-base mb-2">メールアドレス*</label>
           <input
-            v-model="messages.email"
+            v-model="email"
             name="email"
             class="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
           />
+          <p class="text-red-500">{{ errors.email }}</p>
         </div>
 
         <div class="sm:col-span-2">
           <label for="subject" class="inline-block text-gray-800 text-sm sm:text-base mb-2">電話番号*</label>
           <input
-            v-model="messages.phone"
+            v-model="phone"
             name="subject"
             class="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
           />
+          <p class="text-red-500">{{ errors.phone }}</p>
         </div>
 
         <div class="sm:col-span-2">
           <label for="message" class="inline-block text-gray-800 text-sm sm:text-base mb-2">お問い合わせ詳細*</label>
           <textarea
-            v-model="messages.detail"
+            v-model="detail"
             name="message"
             class="w-full h-64 bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
           ></textarea>
+          <p class="text-red-500">{{ errors.detail }}</p>
         </div>
 
         <div class="sm:col-span-2 flex justify-between items-center">

@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Home from "./pages/Home.vue";
+import Contact from "./pages/Contact.vue";
 import Page1 from "./pages/Page1.vue";
 import Page2 from "./pages/Page2.vue";
 
 const routes = [
-  { path: "/", name: "home", component: Home },
+  { path: "/", name: "contact", component: Contact, meta: { title: "お問い合わせ" } },
   { path: "/Page1", name: "page1", component: Page1 },
   { path: "/Page2", name: "page2", component: Page2 },
 ];
