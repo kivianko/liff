@@ -4,6 +4,7 @@ import liff from "@line/liff";
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
 import { metaProperty } from "@babel/types";
+import { values } from "lodash";
 
 type UserProfile = {
   profile?: {
@@ -35,7 +36,7 @@ const { errors, meta, handleSubmit } = useForm({ validationSchema: formSchema })
 // フォームデータバリデーション
 const { value: first_name } = useField<string>("first_name");
 const { value: last_name } = useField<string>("last_name");
-const company = "";
+const company = ref<string>("");
 const { value: email } = useField<string>("email");
 const { value: phone } = useField<number>("phone");
 const { value: detail } = useField<string>("detail");
@@ -67,17 +68,17 @@ const sendMessages = handleSubmit(async (values) => {
           text:
             "__お問い合わせ__" +
             "\n" +
-            first_name +
+            first_name.value +
             "\n" +
-            last_name +
+            last_name.value +
             "\n" +
-            company +
+            company.value +
             "\n" +
-            email +
+            email.value +
             "\n" +
-            phone +
+            phone.value +
             "\n" +
-            detail,
+            detail.value,
         },
       ])
       .then(() => {
