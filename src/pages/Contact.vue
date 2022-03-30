@@ -3,8 +3,6 @@ import { onMounted, reactive, ref } from "vue";
 import liff from "@line/liff";
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
-import { metaProperty } from "@babel/types";
-import { values } from "lodash";
 
 type UserProfile = {
   profile?: {
@@ -31,7 +29,7 @@ const formSchema = yup.object({
   detail: yup.string().required("詳細は必須項目です"),
 });
 
-const { errors, meta, handleSubmit } = useForm({ validationSchema: formSchema });
+const { errors, handleSubmit } = useForm({ validationSchema: formSchema });
 
 // フォームデータバリデーション
 const { value: first_name } = useField<string>("first_name");
