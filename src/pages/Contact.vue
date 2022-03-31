@@ -1,22 +1,8 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
+import { ref } from "vue";
 import liff from "@line/liff";
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
-
-type UserProfile = {
-  profile?: {
-    userId: string;
-    displayName: string;
-    pictureUrl?: string;
-    statusMessage?: string;
-  };
-};
-
-const isInClient = ref<boolean | "NOT_INITIALIZED">("NOT_INITIALIZED");
-const userProfile = reactive<UserProfile>({
-  profile: undefined,
-});
 
 const formSchema = yup.object({
   first_name: yup.string().required("性は必須項目です"),
@@ -39,22 +25,7 @@ const { value: email } = useField<string>("email");
 const { value: phone } = useField<number>("phone");
 const { value: detail } = useField<string>("detail");
 
-onMounted(async () => {
-  // LIFFブラウザで起動しているかの判定
-  if (liff.isInClient()) {
-    isInClient.value = true;
-    getProfile();
-    return;
-  }
-
-  isInClient.value = false;
-});
-
-const getProfile = async () => {
-  const profile = await liff.getProfile();
-  userProfile.profile = profile;
-};
-
+// 関数
 const sendMessages = handleSubmit(async (values) => {
   if (!liff.isInClient()) {
     window.alert("現在、LIFFを外部ブラウザで開いているため、このボタンは使用できません。");
